@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#294172"/>
+            <stop offset="100%" stop-color="#1a1a2e"/>
+        </linearGradient>
+        <linearGradient id="blitz" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f9e076"/>
+            <stop offset="100%" stop-color="#f39c12"/>
+        </linearGradient>
+    </defs>
+
+    <circle cx="64" cy="64" r="60" fill="url(#bg)" stroke="#3c6eb4" stroke-width="4"/>
+
+    <path d="M42 40 L58 78 L66 68 L82 90 L92 82 L76 60 L86 56 Z"
+          fill="#ecf0f1" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"/>
+
+    <polygon points="84,30 76,48 86,48 78,68 96,50 86,50 92,30"
+             fill="url(#blitz)" stroke="#d35400" stroke-width="1.5"/>
+
+    <path d="M44 50 Q40 64 48 72 Q56 80 64 72 Q72 64 80 72 Q88 80 84 64 Q80 50 72 44 Q64 40 56 44 Q44 48 44 50 Z"
+          fill="none" stroke="#3c6eb4" stroke-width="2.5" opacity="0.5"/>
+</svg>
