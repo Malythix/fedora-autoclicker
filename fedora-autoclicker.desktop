@@ -1,0 +1,18 @@
+[Desktop Entry]
+Categories=Utility;
+Comment[de_DE]=All-in-one Clicker & Macro Automation
+Comment=All-in-one Clicker & Macro Automation
+Exec=pkexec env 'DISPLAY=$DISPLAY' 'XAUTHORITY=$XAUTHORITY' fedora-auto-clicker
+GenericName[de_DE]=
+GenericName=
+Icon=fedora-auto-clicker
+MimeType=
+Name[de_DE]=Fedora Auto Clicker
+Name=Fedora Auto Clicker
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-KDE-SubstituteUID=false
+X-KDE-Username=
