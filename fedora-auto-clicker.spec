@@ -15,7 +15,7 @@ macro recording/playback, scheduled starts, idle detection, and profile support.
 All dependencies are bundled, no pip required.
 
 %prep
-%setup -q
+%setup -q -n fedora-auto-clicker
 
 %install
 mkdir -p %{buildroot}%{_bindir}
@@ -23,8 +23,8 @@ mkdir -p %{buildroot}%{_datadir}/%{name}
 # Projektinhalt kopieren (außer spec, Makefile etc.)
 cp -r fedora-auto-clicker.py libs/ lang.json profiles/ fedora-auto-clicker.svg %{buildroot}%{_datadir}/%{name}/
 # Symlink für den Befehl
-ln -s %{_datadir}/%{name}/fedora-auto-clicker.py %{buildroot}%{_bindir}/fedora-auto-clicker
-chmod +x %{buildroot}%{_bindir}/fedora-auto-clicker
+ln -s ../share/%{name}/fedora-auto-clicker.py %{buildroot}%{_bindir}/fedora-auto-clicker
+chmod +x %{buildroot}%{_datadir}/%{name}/fedora-auto-clicker.py
 
 # Desktop-Datei und Icon installieren
 mkdir -p %{buildroot}%{_datadir}/applications

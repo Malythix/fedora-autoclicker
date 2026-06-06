@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 Fedora Auto Clicker – All-in-One Clicker & Macro Automation
 Licensed under GPLv3
@@ -10,8 +10,10 @@ import threading
 import time
 import random
 import json
-import os
 import sys
+import os
+true_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.join(true_dir, 'libs'))
 import datetime
 import re
 import subprocess
@@ -19,33 +21,15 @@ import libevdev
 from libevdev import EV_KEY, EV_SYN
 import keyboard  # global hotkeys + key combo simulation
 import pyautogui  # for recording mouse/position (bundled alternative)
+pyautogui.PAUSE = 0.01
 import logging
-
-# ------------------------------------------------------------
-# Embedded fallback for missing pip deps (bundled libs)
-# ------------------------------------------------------------
-try:
-    import customtkinter
-except ImportError:
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'libs'))
-    import customtkinter
-try:
-    import keyboard
-except ImportError:
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'libs'))
-    import keyboard
-try:
-    import pyautogui
-except ImportError:
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'libs'))
-    import pyautogui
 
 # ------------------------------------------------------------
 # App Configuration
 # ------------------------------------------------------------
 APP_NAME = "Fedora Auto Clicker"
 VERSION = "1.0.0"
-LANG_FILE = os.path.join(os.path.dirname(__file__), "lang.json")
+LANG_FILE = os.path.join(true_dir, "lang.json")
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -225,7 +209,7 @@ class FedoraAutoClicker(ctk.CTk):
     def refresh_texts(self):
         self.title_label.configure(text=tr("title"))
         self.always_on_top_check.configure(text=tr("always_on_top"))
-        self.status_label.configure(text=self.get_status_text())
+        self.update_status("ready")
         # update tabs titles
         self.tabview.configure(**{f"{tr('clicker_tab')}": ...})  # not possible directly; we'll use tab names
         # Instead, we reconstruct tabs, but to keep it simple, we just set tab names
@@ -452,18 +436,35 @@ class FedoraAutoClicker(ctk.CTk):
     # Global Hotkeys
     # ------------------------------------------------------------
     def register_global_hotkeys(self):
-        keyboard.unhook_all_hotkeys()  # clear previous
+        # clear previous hotkeys
+        try:
+            keyboard.unhook_all_hotkeys()
+        except AttributeError:
+            try:
+                keyboard.remove_hotkey(self.start_hotkey)
+            except:
+                pass
+            try:
+                keyboard.remove_hotkey(self.stop_hotkey)
+            except:
+                pass
+            try:
+                keyboard.remove_hotkey(self.listen_hotkey)
+            except:
+                pass
+
         keyboard.add_hotkey(self.start_hotkey, self.hotkey_start)
         keyboard.add_hotkey(self.stop_hotkey, self.hotkey_stop)
         keyboard.add_hotkey(self.listen_hotkey, self.hotkey_listen)
 
     def hotkey_start(self):
         self.after(0, self.start_action)
+
     def hotkey_stop(self):
         self.after(0, self.stop_action)
+
     def hotkey_listen(self):
         self.after(0, self.listen_combo)
-
     # ------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------
@@ -475,14 +476,18 @@ class FedoraAutoClicker(ctk.CTk):
         self.start_btn.configure(state="disabled")
         self.stop_btn.configure(state="normal")
         self.update_status("running")
-        current_tab = self.tabview.get()
-        if current_tab == self.clicker_tab:
+        current_tab = self.tabview.get()   # ein String (übersetzt)
+        if current_tab == tr("clicker_tab"):
             threading.Thread(target=self.clicker_loop, daemon=True).start()
-        elif current_tab == self.keycombo_tab:
+        elif current_tab == tr("keycombo_tab"):
             threading.Thread(target=self.keycombo_loop, daemon=True).start()
-        elif current_tab == self.macro_tab:
-            # macro playback is handled separately
-            pass
+        elif current_tab == tr("macro_tab"):
+            # Wenn ein Makro existiert, spiele es ab, sonst Hinweis
+            if self.macro_events:
+                self.play_macro()   # startet selbst einen Thread
+            else:
+                self.stop_action()
+                messagebox.showinfo("Info", "No macro recorded.")
         else:
             self.stop_action()
             messagebox.showinfo("Info", "Switch to Clicker, Key Combo or Macro tab.")
@@ -531,17 +536,12 @@ class FedoraAutoClicker(ctk.CTk):
                 radius = 0
 
         while self.is_running and not self.paused:
-            # Position
             if fixed_pos:
                 x, y = fixed_pos
-            else:
-                x, y = pyautogui.position()
-            if radius > 0:
-                x += random.randint(-radius, radius)
-                y += random.randint(-radius, radius)
-            pyautogui.moveTo(x, y)
-
-            # Click
+                if radius > 0:
+                    x += random.randint(-radius, radius)
+                    y += random.randint(-radius, radius)
+                pyautogui.moveTo(x, y)
             pyautogui.click(button=button)
             self.stats_counter += 1
             self.after(0, self.update_stats)
@@ -549,7 +549,6 @@ class FedoraAutoClicker(ctk.CTk):
             if repeat > 0 and count >= repeat:
                 break
 
-            # Delay
             time.sleep(delay)
             if self.random_var.get():
                 delay = random.uniform(float(self.min_entry.get()), float(self.max_entry.get()))
@@ -694,7 +693,7 @@ class FedoraAutoClicker(ctk.CTk):
     # Profile Management
     # ------------------------------------------------------------
     def get_profile_list(self):
-        profile_dir = os.path.join(os.path.dirname(__file__), "profiles")
+        profile_dir = os.path.join(true_dir, "profiles")
         if not os.path.exists(profile_dir):
             os.makedirs(profile_dir)
         return [f.replace('.json','') for f in os.listdir(profile_dir) if f.endswith('.json')]
