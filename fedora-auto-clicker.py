@@ -541,7 +541,13 @@ class FedoraAutoClicker(ctk.CTk):
                 if radius > 0:
                     x += random.randint(-radius, radius)
                     y += random.randint(-radius, radius)
+                # Save original window state to avoid desktop manager interference 
+                was_topmost = self.attributes("-topmost")
+                # Temporarily disable always-on-top to allow proper mouse positioning
+                self.attributes("-topmost", False)
                 pyautogui.moveTo(x, y)
+                # Restore always-on-top state
+                self.attributes("-topmost", was_topmost)
             pyautogui.click(button=button)
             self.stats_counter += 1
             self.after(0, self.update_stats)
